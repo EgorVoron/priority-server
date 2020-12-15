@@ -74,11 +74,9 @@ int main() {
             if (priorityQueue.userExists(uid)) {
                 set<long long> outputSet = priorityQueue.getUserNodes(uid);
                 std::ostringstream os;
-                for (long long i : outputSet) {
-                    os << i;
-                    os << "; ";
-                }
-                return crow::response{os.str()};
+                for (long long i : outputSet) os << i << "; ";
+                string osStr = os.str();
+                return crow::response{osStr.substr(0, osStr.size()-2)};
             }
             return crow::response(404);
         } catch (...) { return crow::response(500); }
@@ -86,18 +84,16 @@ int main() {
 
     CROW_ROUTE(app, "/changeUserNodes").methods("POST"_method)([](const crow::request &req) {
         auto inputJson = crow::json::load(req.body);
-        if (!inputJson) return crow::response(400);
+        if (!checkJson(inputJson, {"uid", "priority"})) return crow::response(400);
         try {
             long long uid = inputJson["uid"].i();
             if (priorityQueue.userExists(uid)) {
                 long long priority = inputJson["priority"].i();
                 vector<long long> outputVector = priorityQueue.changeUserNodes(uid, priority);
                 std::ostringstream os;
-                for (long long i : outputVector) {
-                    os << i;
-                    os << "; ";
-                }
-                return crow::response{os.str()};
+                for (long long i : outputVector) os << i << "; ";
+                string osStr = os.str();
+                return crow::response{osStr.substr(0, osStr.size()-2)};
             }
             return crow::response(404);
         } catch (...) { return crow::response(500); }
