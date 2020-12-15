@@ -34,7 +34,7 @@ bool correctFile(std::string &path) {
     return (!fileStream.fail() && fileStream.peek() != std::ifstream::traits_type::eof());
 }
 
-bool checkJson(crow::json::rvalue &j, std::vector<std::string> params) {
+bool validJson(crow::json::rvalue &j, std::vector<std::string> params) {
     if (!j) return false;
     for (std::string &param : params) {
         if (j.count(param) == 0) return false;

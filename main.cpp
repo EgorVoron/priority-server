@@ -7,6 +7,7 @@ using json = nlohmann::json;
 
 PriorityQueue priorityQueue;
 
+// initialise random generator
 std::random_device rd;
 std::mt19937_64 eng(rd());
 std::uniform_int_distribution<unsigned long long> distr;
@@ -16,7 +17,7 @@ int main() {
 
     CROW_ROUTE(app, "/add").methods("POST"_method)([](const crow::request &req) {
         auto inputJson = crow::json::load(req.body);
-        if (!checkJson(inputJson, {"uid", "priority", "payload"})) return crow::response(400);
+        if (!validJson(inputJson, {"uid", "priority", "payload"})) return crow::response(400);
         try {
             long long uid = inputJson["uid"].i();
             long long priority = inputJson["priority"].i();
@@ -25,25 +26,38 @@ int main() {
             std::ostringstream os;
             os << id;
             return crow::response{201, os.str()};
-        } catch (...) { return crow::response(500); }
+        } catch (exception &e) {
+            std::cout << e.what() << '\n';
+            return crow::response(500);
+        }
+        catch (...) {
+            std::cout << "Unknown error\n";
+            return crow::response(500);
+        }
     });
 
     CROW_ROUTE(app, "/delete").methods("DELETE"_method)([](const crow::request &req) {
         string body = req.body;
         if (body.empty()) return crow::response(400);
-        long long id = str2ll(body);
         try {
+            long long id = str2ll(body);
             if (priorityQueue.exists(id)) {
                 priorityQueue.erase(id);
                 return crow::response(204);
             }
             return crow::response(404);
-        } catch (...) { return crow::response(500); }
+        } catch (exception &e) {
+            std::cout << e.what() << '\n';
+            return crow::response(500);
+        }
+        catch (...) {
+            std::cout << "Unknown error\n";
+            return crow::response(500);
+        }
     });
 
     CROW_ROUTE(app, "/get").methods("GET"_method)([](const crow::request &req) {
         string strId = req.url_params.get("id");
-        cout << strId;
         if (strId.empty()) return crow::response(400);
         try {
             long long id = str2ll(strId);
@@ -52,14 +66,28 @@ int main() {
                 return crow::response{outputStr};
             }
             return crow::response(404);
-        } catch (...) { return crow::response(500); }
+        } catch (exception &e) {
+            std::cout << e.what() << '\n';
+            return crow::response(500);
+        }
+        catch (...) {
+            std::cout << "Unknown error\n";
+            return crow::response(500);
+        }
     });
 
     CROW_ROUTE(app, "/getMax").methods("GET"_method)([] {
         try {
             if (priorityQueue.isEmpty()) return crow::response(404);
             return crow::response(priorityQueue.getMax().toString());
-        } catch (...) { return crow::response(500); }
+        } catch (exception &e) {
+            std::cout << e.what() << '\n';
+            return crow::response(500);
+        }
+        catch (...) {
+            std::cout << "Unknown error\n";
+            return crow::response(500);
+        }
     });
 
     CROW_ROUTE(app, "/getUserNodes").methods("GET"_method)([](const crow::request &req) {
@@ -75,12 +103,19 @@ int main() {
                 return crow::response{osStr.substr(0, osStr.size() - 2)};
             }
             return crow::response(404);
-        } catch (...) { return crow::response(500); }
+        } catch (exception &e) {
+            std::cout << e.what() << '\n';
+            return crow::response(500);
+        }
+        catch (...) {
+            std::cout << "Unknown error\n";
+            return crow::response(500);
+        }
     });
 
     CROW_ROUTE(app, "/changeUserNodes").methods("POST"_method)([](const crow::request &req) {
         auto inputJson = crow::json::load(req.body);
-        if (!checkJson(inputJson, {"uid", "priority"})) return crow::response(400);
+        if (!validJson(inputJson, {"uid", "priority"})) return crow::response(400);
         try {
             long long uid = inputJson["uid"].i();
             if (priorityQueue.userExists(uid)) {
@@ -92,7 +127,14 @@ int main() {
                 return crow::response{osStr.substr(0, osStr.size() - 2)};
             }
             return crow::response(404);
-        } catch (...) { return crow::response(500); }
+        } catch (exception &e) {
+            std::cout << e.what() << '\n';
+            return crow::response(500);
+        }
+        catch (...) {
+            std::cout << "Unknown error\n";
+            return crow::response(500);
+        }
     });
 
     app.port(8080).run();

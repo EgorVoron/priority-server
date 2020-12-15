@@ -43,79 +43,65 @@ Node nodeFromJson(json j) {
 }
 
 long long parent(long long i) { return i / 2; }
-
 long long leftChild(long long i) { return i * 2; }
-
 long long rightChild(long long i) { return i * 2 + 1; }
 
 class PriorityQueue {
 private:
     vector<Node> array;
     map<long long, long long> id2idx;
-
     map<long long, set<long long>> userNodesIds;
     map<long long, long long> nodeUser;
 
     string filePath;
 
     void fullSwap(Node *a, Node *b);
-
     void siftUp(long long i);
-
     void siftDown(long long i);
-
     void clearContainers();
 
 public:
     bool isEmpty();
-
     PriorityQueue(string path = "queue.bson");
-
     ~PriorityQueue();
-
-    void deserialize();
-
     long long insert(long long uid, long long priority, json payload, long long randll);
-
     void erase(long long id);
-
     Node get(long long int id);
-
     Node getMax();
-
     set<long long> getUserNodes(long long uid);
-
     vector<long long> changeUserNodes(long long uid, long long priority);
-
     bool exists(long long id);
-
     bool userExists(long long uid);
-
     void print();
 };
 
 PriorityQueue::PriorityQueue(string path) : filePath(std::move(path)) {
     if (correctFile(filePath)) {
-//        try {
-        ifstream infile(filePath);
-        uint8_t tmp;
-        vector<uint8_t> vectorBson;
-        while (infile >> tmp) {
-            vectorBson.push_back(tmp);
-        }
-        json listJson = json::from_bson(vectorBson)["data"];
-        for (const auto& nodeJson : listJson) {
-            Node node = nodeFromJson(nodeJson);
+        try {
+            ifstream infile(filePath);
+            uint8_t tmp;
+            vector<uint8_t> vectorBson;
+            while (infile >> tmp) {
+                vectorBson.push_back(tmp);
+            }
+            json listJson = json::from_bson(vectorBson)["data"];
+            for (const auto& nodeJson : listJson) {
+                Node node = nodeFromJson(nodeJson);
 
-            array.push_back(node);
-            id2idx[node.id] = (array.size() - 1);
-            siftUp(array.size() - 1);
+                array.push_back(node);
+                id2idx[node.id] = (array.size() - 1);
+                siftUp(array.size() - 1);
 
-            // plan 56
-            userNodesIds[node.uid].insert(node.id);
-            nodeUser[node.id] = node.uid;
+                // plan 56
+                userNodesIds[node.uid].insert(node.id);
+                nodeUser[node.id] = node.uid;
+            }
+        } catch (exception &e) {
+            cout << "Cannot serialize queue: " << e.what() << '\n';
         }
-//        } catch (...) {}
+        catch (...) {
+            cout << "Cannot serialize queue: unknown error\n";
+        }
     }
     print();
 }
@@ -149,10 +135,6 @@ PriorityQueue::~PriorityQueue() {
         savedQueueBson.clear();
     }
     clearContainers();
-}
-
-void PriorityQueue::deserialize() {
-
 }
 
 void PriorityQueue::fullSwap(Node *a, Node *b) {
