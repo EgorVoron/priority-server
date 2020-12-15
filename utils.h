@@ -1,7 +1,7 @@
 #include "crow/crow_all.h"
 #include "json/json.hpp"
 
-struct ExampleMiddleware {
+struct SomeMiddleware {
     std::string message;
     struct context {
     };

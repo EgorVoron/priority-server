@@ -17,7 +17,7 @@ bool checkJson(crow::json::rvalue &j, vector<string> params) {
 }
 
 int main() {
-    crow::App<ExampleMiddleware> app;
+    crow::App<SomeMiddleware> app;
 
     CROW_ROUTE(app, "/add").methods("POST"_method)([](const crow::request &req) {
         auto inputJson = crow::json::load(req.body);
