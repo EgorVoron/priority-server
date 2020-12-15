@@ -62,9 +62,10 @@ private:
 
 public:
     bool isEmpty();
-    PriorityQueue(string path = "queue.bson");
+    PriorityQueue(string path);
     ~PriorityQueue();
     long long insert(long long uid, long long priority, json payload, long long randll);
+    void extractMax();
     void erase(long long id);
     Node get(long long int id);
     Node getMax();
@@ -81,10 +82,9 @@ PriorityQueue::PriorityQueue(string path) : filePath(std::move(path)) {
             ifstream infile(filePath);
             uint8_t tmp;
             vector<uint8_t> vectorBson;
-            while (infile >> tmp) {
-                vectorBson.push_back(tmp);
-            }
-            json listJson = json::from_bson(vectorBson)["data"];
+            std::string contents((std::istreambuf_iterator<char>(infile)),
+                                 std::istreambuf_iterator<char>());
+            json listJson = json::from_bson(contents)["data"];
             for (const auto& nodeJson : listJson) {
                 Node node = nodeFromJson(nodeJson);
 
@@ -116,14 +116,17 @@ void PriorityQueue::clearContainers() {
 PriorityQueue::~PriorityQueue() {
     if (!isEmpty()) {
         json savedQueueJsonList;
-        while (!array.empty()) {
-            auto max = getMax();
-            savedQueueJsonList.push_back(max.toJson());
-            erase(0);
+//        while (!isEmpty()) {
+//            Node max = getMax();
+//            savedQueueJsonList.push_back(max.toJson());
+//            extractMax();
+//        }
+        for (Node node : array) {
+            savedQueueJsonList.push_back(node.toJson());
         }
         json savedQueueJsonDict;
         savedQueueJsonDict["data"] = savedQueueJsonList;
-
+        cout << savedQueueJsonDict;
         ofstream outfile(filePath);
         vector<uint8_t> savedQueueBson = json::to_bson(savedQueueJsonDict);
         for (uint8_t n : savedQueueBson) {
@@ -188,6 +191,19 @@ long long PriorityQueue::insert(long long uid, long long priority, json payload,
     userNodesIds[uid].insert(node.id);
     nodeUser[node.id] = uid;
     return node.id;
+}
+
+void PriorityQueue::extractMax() {
+    long long id = array[0].id;
+
+    fullSwap(&array[0], &array[array.size() - 1]);
+    array.pop_back();
+    siftDown(0);
+
+    long long user = nodeUser[id];
+    userNodesIds[user].erase(id);
+    nodeUser.erase(id);
+    id2idx.erase(id);
 }
 
 // адекватно

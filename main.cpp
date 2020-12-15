@@ -5,12 +5,12 @@
 
 using json = nlohmann::json;
 
-PriorityQueue priorityQueue;
+PriorityQueue priorityQueue = PriorityQueue("queue0.bson");
 
 // initialise random generator
 std::random_device rd;
 std::mt19937_64 eng(rd());
-std::uniform_int_distribution<unsigned long long> distr;
+std::uniform_int_distribution<int> distr;
 
 int main() {
     crow::App<SomeMiddleware> app;
@@ -78,6 +78,7 @@ int main() {
 
     CROW_ROUTE(app, "/getMax").methods("GET"_method)([] {
         try {
+            priorityQueue.print();
             if (priorityQueue.isEmpty()) return crow::response(404);
             return crow::response(priorityQueue.getMax().toString());
         } catch (exception &e) {
