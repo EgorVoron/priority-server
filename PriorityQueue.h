@@ -116,14 +116,14 @@ void PriorityQueue::clearContainers() {
 PriorityQueue::~PriorityQueue() {
     if (!isEmpty()) {
         json savedQueueJsonList;
-//        while (!isEmpty()) {
-//            Node max = getMax();
-//            savedQueueJsonList.push_back(max.toJson());
-//            extractMax();
-//        }
-        for (Node node : array) {
-            savedQueueJsonList.push_back(node.toJson());
+        while (!isEmpty()) {
+            Node max = getMax();
+            savedQueueJsonList.push_back(max.toJson());
+            extractMax();
         }
+//        for (Node node : array) {
+//            savedQueueJsonList.push_back(node.toJson());
+//        }
         json savedQueueJsonDict;
         savedQueueJsonDict["data"] = savedQueueJsonList;
         cout << savedQueueJsonDict;
@@ -258,5 +258,7 @@ void PriorityQueue::print() {
         cout << i.uid << " " << i.priority << " " << i.id << endl;
     }
     cout << "-----------------------------";
+    cout << endl;
+    for (auto i : id2idx) cout << i.first << " ";
     cout << endl;
 }
