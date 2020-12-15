@@ -8,12 +8,20 @@ using json = nlohmann::json;
 
 PriorityQueue priorityQueue;
 
+bool checkJson(crow::json::rvalue &j, vector<string> params) {
+    if (!j) return false;
+    for (string &param : params) {
+        if (j.count(param) == 0) return false;
+    }
+    return true;
+}
+
 int main() {
     crow::App<ExampleMiddleware> app;
 
     CROW_ROUTE(app, "/add").methods("POST"_method)([](const crow::request &req) {
         auto inputJson = crow::json::load(req.body);
-        if (!inputJson) return crow::response(400);
+        if (!checkJson(inputJson, {"uid", "priority", "payload"})) return crow::response(400);
         try {
             long long uid = inputJson["uid"].i();
             long long priority = inputJson["priority"].i();
@@ -21,7 +29,7 @@ int main() {
             long long id = priorityQueue.insert(uid, priority, payload);
             std::ostringstream os;
             os << id;
-            return crow::response{os.str()};
+            return crow::response{201, os.str()};
         } catch (...) { return crow::response(500); }
     });
 
