@@ -7,13 +7,9 @@ using json = nlohmann::json;
 
 PriorityQueue priorityQueue;
 
-bool checkJson(crow::json::rvalue &j, vector<string> params) {
-    if (!j) return false;
-    for (string &param : params) {
-        if (j.count(param) == 0) return false;
-    }
-    return true;
-}
+std::random_device rd;
+std::mt19937_64 eng(rd());
+std::uniform_int_distribution<unsigned long long> distr;
 
 int main() {
     crow::App<SomeMiddleware> app;
@@ -25,7 +21,7 @@ int main() {
             long long uid = inputJson["uid"].i();
             long long priority = inputJson["priority"].i();
             json payload = formatPayload(inputJson["payload"]);
-            long long id = priorityQueue.insert(uid, priority, payload);
+            long long id = priorityQueue.insert(uid, priority, payload, distr(eng));
             std::ostringstream os;
             os << id;
             return crow::response{201, os.str()};
@@ -67,7 +63,7 @@ int main() {
     });
 
     CROW_ROUTE(app, "/getUserNodes").methods("GET"_method)([](const crow::request &req) {
-        string strUid = req.url_params.get("id");
+        string strUid = req.url_params.get("uid");
         if (strUid.empty()) return crow::response(400);
         try {
             long long uid = str2ll(strUid);
@@ -76,7 +72,7 @@ int main() {
                 std::ostringstream os;
                 for (long long i : outputSet) os << i << "; ";
                 string osStr = os.str();
-                return crow::response{osStr.substr(0, osStr.size()-2)};
+                return crow::response{osStr.substr(0, osStr.size() - 2)};
             }
             return crow::response(404);
         } catch (...) { return crow::response(500); }
@@ -93,7 +89,7 @@ int main() {
                 std::ostringstream os;
                 for (long long i : outputVector) os << i << "; ";
                 string osStr = os.str();
-                return crow::response{osStr.substr(0, osStr.size()-2)};
+                return crow::response{osStr.substr(0, osStr.size() - 2)};
             }
             return crow::response(404);
         } catch (...) { return crow::response(500); }

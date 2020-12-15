@@ -14,9 +14,6 @@ struct Node {
     Node(long long id, long long uid, long long priority, json &payload) : id(id), uid(uid), priority(priority),
                                                                            payload(payload) {}
 
-    Node(long long uid, long long priority, json &payload) : id(rand()), uid(uid), priority(priority),
-                                                             payload(payload) {}
-
     json toJson() {
         json j;
         j["id"] = id;
@@ -46,7 +43,9 @@ Node nodeFromJson(json j) {
 }
 
 long long parent(long long i) { return i / 2; }
+
 long long leftChild(long long i) { return i * 2; }
+
 long long rightChild(long long i) { return i * 2 + 1; }
 
 class PriorityQueue {
@@ -60,47 +59,62 @@ private:
     string filePath;
 
     void fullSwap(Node *a, Node *b);
+
     void siftUp(long long i);
+
     void siftDown(long long i);
+
     void clearContainers();
 
 public:
     bool isEmpty();
-    PriorityQueue(string path="queue.bson");
+
+    PriorityQueue(string path = "queue.bson");
+
     ~PriorityQueue();
+
     void deserialize();
-    long long insert(long long uid, long long priority, json payload);
+
+    long long insert(long long uid, long long priority, json payload, long long randll);
+
     void erase(long long id);
+
     Node get(long long int id);
+
     Node getMax();
+
     set<long long> getUserNodes(long long uid);
+
     vector<long long> changeUserNodes(long long uid, long long priority);
+
     bool exists(long long id);
+
     bool userExists(long long uid);
+
     void print();
 };
 
 PriorityQueue::PriorityQueue(string path) : filePath(std::move(path)) {
     if (correctFile(filePath)) {
 //        try {
-            ifstream infile(filePath);
-            uint8_t tmp;
-            vector<uint8_t> vectorBson;
-            while (infile >> tmp) {
-                vectorBson.push_back(tmp);
-            }
-            json listJson = json::from_bson(vectorBson)["data"];
-            for (auto nodeJson : listJson) {
-                Node node = nodeFromJson(nodeJson);
+        ifstream infile(filePath);
+        uint8_t tmp;
+        vector<uint8_t> vectorBson;
+        while (infile >> tmp) {
+            vectorBson.push_back(tmp);
+        }
+        json listJson = json::from_bson(vectorBson)["data"];
+        for (const auto& nodeJson : listJson) {
+            Node node = nodeFromJson(nodeJson);
 
-                array.push_back(node);
-                id2idx[node.id] = (array.size() - 1);
-                siftUp(array.size() - 1);
+            array.push_back(node);
+            id2idx[node.id] = (array.size() - 1);
+            siftUp(array.size() - 1);
 
-                // plan 56
-                userNodesIds[node.uid].insert(node.id);
-                nodeUser[node.id] = node.uid;
-            }
+            // plan 56
+            userNodesIds[node.uid].insert(node.id);
+            nodeUser[node.id] = node.uid;
+        }
 //        } catch (...) {}
     }
     print();
@@ -181,8 +195,8 @@ bool PriorityQueue::isEmpty() {
     return array.empty();
 }
 
-long long PriorityQueue::insert(long long uid, long long priority, json payload) {
-    Node node = Node(uid, priority, payload);
+long long PriorityQueue::insert(long long uid, long long priority, json payload, long long randll) {
+    Node node = Node(randll, uid, priority, payload);
     array.push_back(node);
     id2idx[node.id] = (array.size() - 1);
     siftUp(array.size() - 1);
@@ -242,7 +256,7 @@ bool PriorityQueue::userExists(long long uid) {
 }
 
 void PriorityQueue::print() {
-    for (auto i : array) {
+    for (const auto& i : array) {
         cout << i.uid << " " << i.priority << " " << i.id << endl;
     }
     cout << "-----------------------------";
