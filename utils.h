@@ -1,5 +1,8 @@
+#include <bits/stdc++.h>
 #include "crow/crow_all.h"
 #include "json/json.hpp"
+
+using nlohmann::json;
 
 struct SomeMiddleware {
     std::string message;
@@ -19,8 +22,14 @@ json formatPayload(const crow::json::rvalue &x) {
     return json::parse(os.str());
 }
 
-long long str2ll(string str) {
+long long str2ll(std::string &str) {
     std::string::size_type sz = 0;
     long long id = std::stoll(str, &sz, 0);
     return id;
+}
+
+bool correctFile(std::string &path) {
+    std::fstream fileStream;
+    fileStream.open(path);
+    return (!fileStream.fail() && fileStream.peek() != std::ifstream::traits_type::eof());
 }

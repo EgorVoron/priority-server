@@ -2,7 +2,6 @@
 #include "crow/crow_all.h"
 #include "json/json.hpp"
 #include "PriorityQueue.h"
-#include "utils.h"
 
 using json = nlohmann::json;
 
@@ -48,6 +47,7 @@ int main() {
 
     CROW_ROUTE(app, "/get").methods("GET"_method)([](const crow::request &req) {
         string strId = req.url_params.get("id");
+        cout << strId;
         if (strId.empty()) return crow::response(400);
         try {
             long long id = str2ll(strId);

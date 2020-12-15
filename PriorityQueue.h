@@ -1,20 +1,21 @@
 #include <bits/stdc++.h>
 #include "json/json.hpp"
+#include "utils.h"
 
-using json = nlohmann::json;
 using namespace std;
 
+using json = nlohmann::json;
+
 struct Node {
-    long long id = rand();
+    long long id;
     long long uid, priority;
     json payload;
 
-    Node(long long uid, long long priority, json &payload) : uid(uid), priority(priority), payload(payload){}
+    Node(long long id, long long uid, long long priority, json &payload) : id(id), uid(uid), priority(priority),
+                                                                           payload(payload) {}
 
-    ~Node() {
-        // todo: подумоть
-        payload = NULL;
-    }
+    Node(long long uid, long long priority, json &payload) : id(rand()), uid(uid), priority(priority),
+                                                             payload(payload) {}
 
     json toJson() {
         json j;
@@ -25,6 +26,11 @@ struct Node {
         return j;
     }
 
+    vector<uint8_t> toBson() {
+        auto b = json::to_bson(toJson());
+        return b;
+    }
+
     string toString() {
         return toJson().dump();
     }
@@ -33,6 +39,11 @@ struct Node {
         cout << "id: " << id << " prio: " << priority << " uid: " << uid << " payload: " << payload << endl;
     }
 };
+
+Node nodeFromJson(json j) {
+    Node node = Node(j["id"], j["uid"], j["priority"], j["payload"]);
+    return node;
+}
 
 long long parent(long long i) { return i / 2; }
 long long leftChild(long long i) { return i * 2; }
@@ -46,13 +57,18 @@ private:
     map<long long, set<long long>> userNodesIds;
     map<long long, long long> nodeUser;
 
+    string filePath;
+
     void fullSwap(Node *a, Node *b);
     void siftUp(long long i);
     void siftDown(long long i);
+    void clearContainers();
 
 public:
     bool isEmpty();
+    PriorityQueue(string path="queue.bson");
     ~PriorityQueue();
+    void deserialize();
     long long insert(long long uid, long long priority, json payload);
     void erase(long long id);
     Node get(long long int id);
@@ -61,9 +77,69 @@ public:
     vector<long long> changeUserNodes(long long uid, long long priority);
     bool exists(long long id);
     bool userExists(long long uid);
-
     void print();
 };
+
+PriorityQueue::PriorityQueue(string path) : filePath(std::move(path)) {
+    if (correctFile(filePath)) {
+//        try {
+            ifstream infile(filePath);
+            uint8_t tmp;
+            vector<uint8_t> vectorBson;
+            while (infile >> tmp) {
+                vectorBson.push_back(tmp);
+            }
+            json listJson = json::from_bson(vectorBson)["data"];
+            for (auto nodeJson : listJson) {
+                Node node = nodeFromJson(nodeJson);
+
+                array.push_back(node);
+                id2idx[node.id] = (array.size() - 1);
+                siftUp(array.size() - 1);
+
+                // plan 56
+                userNodesIds[node.uid].insert(node.id);
+                nodeUser[node.id] = node.uid;
+            }
+//        } catch (...) {}
+    }
+    print();
+}
+
+void PriorityQueue::clearContainers() {
+    id2idx.clear();
+    userNodesIds.clear();
+    nodeUser.clear();
+    array.clear();
+}
+
+PriorityQueue::~PriorityQueue() {
+    if (!isEmpty()) {
+        json savedQueueJsonList;
+        while (!array.empty()) {
+            auto max = getMax();
+            savedQueueJsonList.push_back(max.toJson());
+            erase(0);
+        }
+        json savedQueueJsonDict;
+        savedQueueJsonDict["data"] = savedQueueJsonList;
+
+        ofstream outfile(filePath);
+        vector<uint8_t> savedQueueBson = json::to_bson(savedQueueJsonDict);
+        for (uint8_t n : savedQueueBson) {
+            outfile << n;
+        }
+        outfile.close();
+        savedQueueJsonDict.clear();
+        savedQueueJsonList.clear();
+        savedQueueBson.clear();
+    }
+    clearContainers();
+}
+
+void PriorityQueue::deserialize() {
+
+}
 
 void PriorityQueue::fullSwap(Node *a, Node *b) {
     if ((*a).priority != (*b).priority) {
@@ -105,24 +181,17 @@ bool PriorityQueue::isEmpty() {
     return array.empty();
 }
 
-PriorityQueue::~PriorityQueue() {
-    while (!array.empty()) erase(0);
-    id2idx.clear();
-    userNodesIds.clear();
-    nodeUser.clear();
-}
-
 long long PriorityQueue::insert(long long uid, long long priority, json payload) {
-    Node request = Node(uid, priority, payload);
-    array.push_back(request);
-    id2idx[request.id] = (array.size() - 1);
+    Node node = Node(uid, priority, payload);
+    array.push_back(node);
+    id2idx[node.id] = (array.size() - 1);
     siftUp(array.size() - 1);
 //    cout << "sifted up";
 
     // plan 56
-    userNodesIds[uid].insert(request.id);
-    nodeUser[request.id] = uid;
-    return request.id;
+    userNodesIds[uid].insert(node.id);
+    nodeUser[node.id] = uid;
+    return node.id;
 }
 
 // адекватно
