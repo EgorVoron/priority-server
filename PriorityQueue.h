@@ -31,10 +31,6 @@ struct Node {
     string toString() {
         return toJson().dump();
     }
-
-    void print() {
-        cout << "id: " << id << " prio: " << priority << " uid: " << uid << " payload: " << payload << endl;
-    }
 };
 
 Node nodeFromJson(json j) {
@@ -92,7 +88,6 @@ PriorityQueue::PriorityQueue(string path) : filePath(std::move(path)) {
                 id2idx[node.id] = (array.size() - 1);
                 siftUp(array.size() - 1);
 
-                // plan 56
                 userNodesIds[node.uid].insert(node.id);
                 nodeUser[node.id] = node.uid;
             }
@@ -121,9 +116,6 @@ PriorityQueue::~PriorityQueue() {
             savedQueueJsonList.push_back(max.toJson());
             extractMax();
         }
-//        for (Node node : array) {
-//            savedQueueJsonList.push_back(node.toJson());
-//        }
         json savedQueueJsonDict;
         savedQueueJsonDict["data"] = savedQueueJsonList;
         cout << savedQueueJsonDict;
@@ -143,8 +135,6 @@ PriorityQueue::~PriorityQueue() {
 void PriorityQueue::fullSwap(Node *a, Node *b) {
     if ((*a).priority != (*b).priority) {
         swap(*a, *b);
-//        cout << "id2idx: ";
-//        for (int i = 0; i < id2idx.size(); i++) {cout << i << ": " << id2idx[i] << " ";}
         swap(id2idx[a->id], id2idx[b->id]);
     }
 }
@@ -185,9 +175,7 @@ long long PriorityQueue::insert(long long uid, long long priority, json payload,
     array.push_back(node);
     id2idx[node.id] = (array.size() - 1);
     siftUp(array.size() - 1);
-//    cout << "sifted up";
 
-    // plan 56
     userNodesIds[uid].insert(node.id);
     nodeUser[node.id] = uid;
     return node.id;
@@ -206,18 +194,15 @@ void PriorityQueue::extractMax() {
     id2idx.erase(id);
 }
 
-// адекватно
 void PriorityQueue::erase(long long id) {
     long long idx = id2idx[id];
     fullSwap(&array[idx], &array[array.size() - 1]);
     array.pop_back();
 
-//    fullSwap(&array[idx], &array[0]);
-//    siftDown(0);
+
     siftUp(idx);
     siftDown(idx);
 
-    // plan 56
     long long user = nodeUser[id];
     userNodesIds[user].erase(id);
     nodeUser.erase(id);
@@ -259,6 +244,7 @@ void PriorityQueue::print() {
     }
     cout << "-----------------------------";
     cout << endl;
+    cout << "id2idx: ";
     for (auto i : id2idx) cout << i.first << " ";
     cout << endl;
 }
