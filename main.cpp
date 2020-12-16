@@ -43,7 +43,7 @@ int main() {
             uint32_t id = str2ul(body);
             if (priorityQueue.exists(id)) {
                 priorityQueue.erase(id);
-                return crow::response(204);
+                return crow::response{201, "201 No Content\r\n"};
             }
             return crow::response(404);
         } catch (exception &e) {
