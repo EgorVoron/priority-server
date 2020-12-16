@@ -145,6 +145,11 @@ PriorityQueue::~PriorityQueue() {
         savedQueueJsonList.clear();
         savedQueueBson.clear();
     }
+    else {
+        std::ofstream ofs;
+        ofs.open(filePath, std::ofstream::out | std::ofstream::trunc);
+        ofs.close();
+    }
     clearContainers();
 }
 
