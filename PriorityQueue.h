@@ -149,10 +149,8 @@ PriorityQueue::~PriorityQueue() {
 }
 
 void PriorityQueue::fullSwap(Node *a, Node *b) {
-    if ((*a).priority != (*b).priority) {
-        swap(*a, *b);
-        swap(id2idx[a->id], id2idx[b->id]);
-    }
+    swap(*a, *b);
+    swap(id2idx[a->id], id2idx[b->id]);
 }
 
 void PriorityQueue::siftUp(uint32_t i) {
@@ -239,10 +237,30 @@ set<uint32_t> PriorityQueue::getUserNodes(uint32_t uid) {
 
 vector<uint32_t> PriorityQueue::changeUserNodes(uint32_t uid, uint32_t newPriority) {
     vector<uint32_t> ans;
-    for (auto userNodeId : userNodesIds[uid]) {
-        array[id2idx[userNodeId]].priority = newPriority;
+    for (uint32_t userNodeId : userNodesIds[uid]) {
+//        array[id2idx[userNodeId]].priority = newPriority;
+
+        Node node = get(userNodeId);
+        Node nodeFixed = Node(node.id, node.uid, newPriority, node.payload);
+        erase(node.id);
+//        print();
+        insert(nodeFixed.uid, nodeFixed.priority, nodeFixed.payload, nodeFixed.id);
+//        print();
+//        auto nodeIdx = id2idx[userNodeId];
+//        siftUp(nodeIdx);
+//        siftDown(nodeIdx);
+
+//        map<uint32_t, uint32_t> id2idx;
+//        map<uint32_t, set<uint32_t>> userNodesIds;
+//        map<uint32_t, uint32_t> nodeUser;
+//
+////        id2idx
+//        userNodesIds;
+//        nodesUser
+//        array[id2idx[userNodeId]].priority = newPriority;
         ans.push_back(userNodeId);
     }
+    print();
     return ans;
 }
 
@@ -259,8 +277,5 @@ void PriorityQueue::print() {
         cout << i.uid << " " << i.priority << " " << i.id << endl;
     }
     cout << "-----------------------------";
-    cout << endl;
-    cout << "id2idx: ";
-    for (auto i : id2idx) cout << i.first << " ";
     cout << endl;
 }
