@@ -19,8 +19,8 @@ int main() {
         auto inputJson = crow::json::load(req.body);
         if (!validJson(inputJson, {"uid", "priority", "payload"})) return crow::response(400);
         try {
-            uint32_t uid = inputJson["uid"].i();
-            uint32_t priority = inputJson["priority"].i();
+            uint32_t uid = inputJson["uid"].u();
+            uint32_t priority = inputJson["priority"].u();
             json payload = formatPayload(inputJson["payload"]);
             uint32_t id = priorityQueue.insert(uid, priority, payload, distr(eng));
             std::ostringstream os;
@@ -118,9 +118,9 @@ int main() {
         auto inputJson = crow::json::load(req.body);
         if (!validJson(inputJson, {"uid", "priority"})) return crow::response(400);
         try {
-            uint32_t uid = inputJson["uid"].i();
+            uint32_t uid = inputJson["uid"].u();
             if (priorityQueue.userExists(uid)) {
-                uint32_t priority = inputJson["priority"].i();
+                uint32_t priority = inputJson["priority"].u();
                 vector<uint32_t> outputVector = priorityQueue.changeUserNodes(uid, priority);
                 std::ostringstream os;
                 for (auto i : outputVector) os << i << "; ";
