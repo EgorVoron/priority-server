@@ -237,9 +237,10 @@ set<uint32_t> PriorityQueue::getUserNodes(uint32_t uid) {
 
 vector<uint32_t> PriorityQueue::changeUserNodes(uint32_t uid, uint32_t newPriority) {
     vector<uint32_t> ans;
-    for (uint32_t userNodeId : userNodesIds[uid]) {
-//        array[id2idx[userNodeId]].priority = newPriority;
-
+//    for (auto i : userNodesIds[uid]) cout << i << " ";
+//    cout << endl;
+    set<uint32_t> setForUser = userNodesIds[uid];
+    for (uint32_t userNodeId : setForUser) {
         Node node = get(userNodeId);
         Node nodeFixed = Node(node.id, node.uid, newPriority, node.payload);
         erase(node.id);
