@@ -244,21 +244,7 @@ vector<uint32_t> PriorityQueue::changeUserNodes(uint32_t uid, uint32_t newPriori
         Node node = get(userNodeId);
         Node nodeFixed = Node(node.id, node.uid, newPriority, node.payload);
         erase(node.id);
-//        print();
         insert(nodeFixed.uid, nodeFixed.priority, nodeFixed.payload, nodeFixed.id);
-//        print();
-//        auto nodeIdx = id2idx[userNodeId];
-//        siftUp(nodeIdx);
-//        siftDown(nodeIdx);
-
-//        map<uint32_t, uint32_t> id2idx;
-//        map<uint32_t, set<uint32_t>> userNodesIds;
-//        map<uint32_t, uint32_t> nodeUser;
-//
-////        id2idx
-//        userNodesIds;
-//        nodesUser
-//        array[id2idx[userNodeId]].priority = newPriority;
         ans.push_back(userNodeId);
     }
     print();
