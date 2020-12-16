@@ -7,11 +7,11 @@ using namespace std;
 using json = nlohmann::json;
 
 struct Node {
-    long long id;
-    long long uid, priority;
+    uint32_t id;
+    uint32_t uid, priority;
     json payload;
 
-    Node(long long id, long long uid, long long priority, json &payload) : id(id), uid(uid), priority(priority),
+    Node(uint32_t id, uint32_t uid, uint32_t priority, json &payload) : id(id), uid(uid), priority(priority),
                                                                            payload(payload) {}
 
     json toJson() {
@@ -38,42 +38,42 @@ Node nodeFromJson(json j) {
     return node;
 }
 
-long long lastIdx(vector<Node> &array) {
-    assert(array.empty());
-    return (long long)array.size() - 1;
+uint32_t lastIdx(vector<Node> &array) {
+    assert(!array.empty());
+    return array.size() - 1;
 }
 
-long long parent(long long i) { return i / 2; }
-long long leftChild(long long i) { return i * 2; }
-long long rightChild(long long i) { return i * 2 + 1; }
+uint32_t parent(uint32_t i) { return i / 2; }
+uint32_t leftChild(uint32_t i) { return i * 2; }
+uint32_t rightChild(uint32_t i) { return i * 2 + 1; }
 
 class PriorityQueue {
 private:
     vector<Node> array;
-    map<long long, long long> id2idx;
-    map<long long, set<long long>> userNodesIds;
-    map<long long, long long> nodeUser;
+    map<uint32_t, uint32_t> id2idx;
+    map<uint32_t, set<uint32_t>> userNodesIds;
+    map<uint32_t, uint32_t> nodeUser;
 
     string filePath;
 
     void fullSwap(Node *a, Node *b);
-    void siftUp(long long i);
-    void siftDown(long long i);
+    void siftUp(uint32_t i);
+    void siftDown(uint32_t i);
     void clearContainers();
 
 public:
     bool isEmpty();
     PriorityQueue(string path);
     ~PriorityQueue();
-    long long insert(long long uid, long long priority, json payload, long long randll);
+    uint32_t insert(uint32_t uid, uint32_t priority, json payload, uint32_t randll);
     void extractMax();
-    void erase(long long id);
-    Node get(long long int id);
+    void erase(uint32_t id);
+    Node get(uint32_t id);
     Node getMax();
-    set<long long> getUserNodes(long long uid);
-    vector<long long> changeUserNodes(long long uid, long long priority);
-    bool exists(long long id);
-    bool userExists(long long uid);
+    set<uint32_t> getUserNodes(uint32_t uid);
+    vector<uint32_t> changeUserNodes(uint32_t uid, uint32_t priority);
+    bool exists(uint32_t id);
+    bool userExists(uint32_t uid);
     void print();
 };
 
@@ -155,16 +155,16 @@ void PriorityQueue::fullSwap(Node *a, Node *b) {
     }
 }
 
-void PriorityQueue::siftUp(long long i) {
+void PriorityQueue::siftUp(uint32_t i) {
     while ((i > 0) && (array[i].priority > array[parent(i)].priority)) {
         fullSwap(&array[i], &array[parent(i)]);
         i /= 2;
     }
 }
 
-void PriorityQueue::siftDown(long long i) {
+void PriorityQueue::siftDown(uint32_t i) {
     while (2 * i < array.size()) {
-        long long j = -1;
+        uint32_t j = -1;
         if (array[leftChild(i)].priority > array[i].priority) {
             j = leftChild(i);
         }
@@ -186,7 +186,7 @@ bool PriorityQueue::isEmpty() {
     return array.empty();
 }
 
-long long PriorityQueue::insert(long long uid, long long priority, json payload, long long randll) {
+uint32_t PriorityQueue::insert(uint32_t uid, uint32_t priority, json payload, uint32_t randll) {
     Node node = Node(randll, uid, priority, payload);
     array.push_back(node);
     id2idx[node.id] = lastIdx(array);
@@ -198,20 +198,20 @@ long long PriorityQueue::insert(long long uid, long long priority, json payload,
 }
 
 void PriorityQueue::extractMax() {
-    long long id = array[0].id;
+    uint32_t id = array[0].id;
 
     fullSwap(&array[0], &array.back());
     array.pop_back();
     siftDown(0);
 
-    long long user = nodeUser[id];
+    uint32_t user = nodeUser[id];
     userNodesIds[user].erase(id);
     nodeUser.erase(id);
     id2idx.erase(id);
 }
 
-void PriorityQueue::erase(long long id) {
-    long long idx = id2idx[id];
+void PriorityQueue::erase(uint32_t id) {
+    uint32_t idx = id2idx[id];
     fullSwap(&array[idx], &array.back());
     array.pop_back();
 
@@ -219,13 +219,13 @@ void PriorityQueue::erase(long long id) {
     siftUp(idx);
     siftDown(idx);
 
-    long long user = nodeUser[id];
+    uint32_t user = nodeUser[id];
     userNodesIds[user].erase(id);
     nodeUser.erase(id);
     id2idx.erase(id);
 }
 
-Node PriorityQueue::get(long long id) {
+Node PriorityQueue::get(uint32_t id) {
     return array[id2idx[id]];
 }
 
@@ -233,12 +233,12 @@ Node PriorityQueue::getMax() {
     return array[0];
 }
 
-set<long long> PriorityQueue::getUserNodes(long long uid) {
+set<uint32_t> PriorityQueue::getUserNodes(uint32_t uid) {
     return userNodesIds[uid];
 }
 
-vector<long long> PriorityQueue::changeUserNodes(long long uid, long long newPriority) {
-    vector<long long> ans;
+vector<uint32_t> PriorityQueue::changeUserNodes(uint32_t uid, uint32_t newPriority) {
+    vector<uint32_t> ans;
     for (auto userNodeId : userNodesIds[uid]) {
         array[id2idx[userNodeId]].priority = newPriority;
         ans.push_back(userNodeId);
@@ -246,11 +246,11 @@ vector<long long> PriorityQueue::changeUserNodes(long long uid, long long newPri
     return ans;
 }
 
-bool PriorityQueue::exists(long long id) {
+bool PriorityQueue::exists(uint32_t id) {
     return (id2idx.find(id) != id2idx.end());
 }
 
-bool PriorityQueue::userExists(long long uid) {
+bool PriorityQueue::userExists(uint32_t uid) {
     return (userNodesIds.find(uid) != userNodesIds.end());
 }
 

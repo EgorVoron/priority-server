@@ -12,16 +12,16 @@
 
 1) /add (Добавление заявки)
 тип: POST
-принимает JSON вида {"uid": long long, "priority": long long, "payload": JSON}
-ответ: id заявки (строка с числом long long)
+принимает JSON вида {"uid": uint32, "priority": uint32, "payload": JSON}
+ответ: id заявки (строка с числом uint32)
 
 2) /delete (Удаление заявки)
 тип: DELETE
-принимает строку с числом long long
+принимает строку с числом uint32
 
 3) /get (Получение заявки)
 тип: GET
-принимает id заявки как long long, возвращает JSON заявки
+принимает id заявки как uint32, возвращает JSON заявки
 
 4) /getMax (Получение самой приоритетной заявки)
 тип: GET
@@ -29,10 +29,10 @@
 
 5) /getUserNodes (Получение всех заявок юзера)
 тип: GET
-принимает uid (long long), возвращает строку вида "long long; long long; long long" с id всех заявок
+принимает uid (uint32), возвращает строку вида "uint32; uint32; uint32" с id всех заявок
 
 6) /changeUserNodes (Изменение приоритета всех заявок юзера)
 Тип: POST
-принимает JSON вида {"uid": long long, "priority": long long}
-возвращает строку вида "long long; long long; long long" с id всех затронутых заявок
+принимает JSON вида {"uid": uint32, "priority": uint32}
+возвращает строку вида "uint32; uint32; uint32" с id всех затронутых заявок
 ```

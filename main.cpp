@@ -5,12 +5,12 @@
 
 using json = nlohmann::json;
 
-PriorityQueue priorityQueue = PriorityQueue("queue0.bson");
+PriorityQueue priorityQueue = PriorityQueue("queue.bson");
 
 // initialise random generator
 std::random_device rd;
 std::mt19937_64 eng(rd());
-std::uniform_int_distribution<int> distr;
+std::uniform_int_distribution<uint32_t> distr;
 
 int main() {
     crow::App<SomeMiddleware> app;
@@ -19,10 +19,10 @@ int main() {
         auto inputJson = crow::json::load(req.body);
         if (!validJson(inputJson, {"uid", "priority", "payload"})) return crow::response(400);
         try {
-            long long uid = inputJson["uid"].i();
-            long long priority = inputJson["priority"].i();
+            uint32_t uid = inputJson["uid"].i();
+            uint32_t priority = inputJson["priority"].i();
             json payload = formatPayload(inputJson["payload"]);
-            long long id = priorityQueue.insert(uid, priority, payload, distr(eng));
+            uint32_t id = priorityQueue.insert(uid, priority, payload, distr(eng));
             std::ostringstream os;
             os << id;
             return crow::response{201, os.str()};
@@ -40,7 +40,7 @@ int main() {
         string body = req.body;
         if (body.empty()) return crow::response(400);
         try {
-            long long id = str2ll(body);
+            uint32_t id = str2ul(body);
             if (priorityQueue.exists(id)) {
                 priorityQueue.erase(id);
                 return crow::response(204);
@@ -60,7 +60,7 @@ int main() {
         string strId = req.url_params.get("id");
         if (strId.empty()) return crow::response(400);
         try {
-            long long id = str2ll(strId);
+            uint32_t id = str2ul(strId);
             if (priorityQueue.exists(id)) {
                 string outputStr = priorityQueue.get(id).toString();
                 return crow::response{outputStr};
@@ -95,11 +95,11 @@ int main() {
         string strUid = req.url_params.get("uid");
         if (strUid.empty()) return crow::response(400);
         try {
-            long long uid = str2ll(strUid);
+            uint32_t uid = str2ul(strUid);
             if (priorityQueue.userExists(uid)) {
-                set<long long> outputSet = priorityQueue.getUserNodes(uid);
+                set<uint32_t> outputSet = priorityQueue.getUserNodes(uid);
                 std::ostringstream os;
-                for (long long i : outputSet) os << i << "; ";
+                for (auto i : outputSet) os << i << "; ";
                 string osStr = os.str();
                 return crow::response{osStr.substr(0, osStr.size() - 2)};
             }
@@ -118,12 +118,12 @@ int main() {
         auto inputJson = crow::json::load(req.body);
         if (!validJson(inputJson, {"uid", "priority"})) return crow::response(400);
         try {
-            long long uid = inputJson["uid"].i();
+            uint32_t uid = inputJson["uid"].i();
             if (priorityQueue.userExists(uid)) {
-                long long priority = inputJson["priority"].i();
-                vector<long long> outputVector = priorityQueue.changeUserNodes(uid, priority);
+                uint32_t priority = inputJson["priority"].i();
+                vector<uint32_t> outputVector = priorityQueue.changeUserNodes(uid, priority);
                 std::ostringstream os;
-                for (long long i : outputVector) os << i << "; ";
+                for (auto i : outputVector) os << i << "; ";
                 string osStr = os.str();
                 return crow::response{osStr.substr(0, osStr.size() - 2)};
             }
