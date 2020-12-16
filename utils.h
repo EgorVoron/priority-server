@@ -22,7 +22,7 @@ json formatPayload(const crow::json::rvalue &x) {
     return json::parse(os.str());
 }
 
-uint32_t str2ul(std::string &str) {
+uint32_t str2uint(std::string &str) {
     std::string::size_type sz = 0;
     uint32_t id = std::stoll(str, &sz, 0);
     return id;

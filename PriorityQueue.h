@@ -65,7 +65,7 @@ public:
     bool isEmpty();
     PriorityQueue(string path);
     ~PriorityQueue();
-    uint32_t insert(uint32_t uid, uint32_t priority, json payload, uint32_t randll);
+    uint32_t insert(uint32_t uid, uint32_t priority, json payload, uint32_t id);
     void extractMax();
     void erase(uint32_t id);
     Node get(uint32_t id);
@@ -74,35 +74,22 @@ public:
     vector<uint32_t> changeUserNodes(uint32_t uid, uint32_t priority);
     bool exists(uint32_t id);
     bool userExists(uint32_t uid);
-    void print();
 };
 
 PriorityQueue::PriorityQueue(string path) : filePath(std::move(path)) {
     if (correctFile(filePath)) {
         try {
             ifstream infile(filePath);
-//            uint8_t tmp;
             vector<uint8_t> vectorBson;
             std::string contents((std::istreambuf_iterator<char>(infile)),
                                  std::istreambuf_iterator<char>());
             json listJson = json::from_bson(contents)["data"];
-            // tested
-//            for (const auto& nodeJson : listJson) {
-//                Node node = nodeFromJson(nodeJson);
-//
-//                array.push_back(node);
-//                id2idx[node.id] = (array.size() - 1);
-//                siftUp(array.size() - 1);
-//
-//                userNodesIds[node.uid].insert(node.id);
-//                nodeUser[node.id] = node.uid;
-//            }
+
             for (const auto& nodeJson : listJson) {
                 Node node = nodeFromJson(nodeJson);
 
                 array.push_back(node);
                 id2idx[node.id] = lastIdx(array);
-//                siftUp(array.size() - 1);
 
                 userNodesIds[node.uid].insert(node.id);
                 nodeUser[node.id] = node.uid;
@@ -114,7 +101,6 @@ PriorityQueue::PriorityQueue(string path) : filePath(std::move(path)) {
             cout << "Cannot serialize queue: unknown error\n";
         }
     }
-    print();
 }
 
 void PriorityQueue::clearContainers() {
@@ -134,7 +120,6 @@ PriorityQueue::~PriorityQueue() {
         }
         json savedQueueJsonDict;
         savedQueueJsonDict["data"] = savedQueueJsonList;
-        cout << savedQueueJsonDict;
         ofstream outfile(filePath);
         vector<uint8_t> savedQueueBson = json::to_bson(savedQueueJsonDict);
         for (uint8_t n : savedQueueBson) {
@@ -189,8 +174,8 @@ bool PriorityQueue::isEmpty() {
     return array.empty();
 }
 
-uint32_t PriorityQueue::insert(uint32_t uid, uint32_t priority, json payload, uint32_t randll) {
-    Node node = Node(randll, uid, priority, payload);
+uint32_t PriorityQueue::insert(uint32_t uid, uint32_t priority, json payload, uint32_t id) {
+    Node node = Node(id, uid, priority, payload);
     array.push_back(node);
     id2idx[node.id] = lastIdx(array);
     siftUp(lastIdx(array));
@@ -242,8 +227,6 @@ set<uint32_t> PriorityQueue::getUserNodes(uint32_t uid) {
 
 vector<uint32_t> PriorityQueue::changeUserNodes(uint32_t uid, uint32_t newPriority) {
     vector<uint32_t> ans;
-//    for (auto i : userNodesIds[uid]) cout << i << " ";
-//    cout << endl;
     set<uint32_t> setForUser = userNodesIds[uid];
     for (uint32_t userNodeId : setForUser) {
         Node node = get(userNodeId);
@@ -252,7 +235,6 @@ vector<uint32_t> PriorityQueue::changeUserNodes(uint32_t uid, uint32_t newPriori
         insert(nodeFixed.uid, nodeFixed.priority, nodeFixed.payload, nodeFixed.id);
         ans.push_back(userNodeId);
     }
-    print();
     return ans;
 }
 
@@ -262,12 +244,4 @@ bool PriorityQueue::exists(uint32_t id) {
 
 bool PriorityQueue::userExists(uint32_t uid) {
     return (userNodesIds.find(uid) != userNodesIds.end());
-}
-
-void PriorityQueue::print() {
-    for (const auto& i : array) {
-        cout << i.uid << " " << i.priority << " " << i.id << endl;
-    }
-    cout << "-----------------------------";
-    cout << endl;
 }

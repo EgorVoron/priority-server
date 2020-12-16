@@ -40,7 +40,7 @@ int main() {
         string body = req.body;
         if (body.empty()) return crow::response(400);
         try {
-            uint32_t id = str2ul(body);
+            uint32_t id = str2uint(body);
             if (priorityQueue.exists(id)) {
                 priorityQueue.erase(id);
                 return crow::response{201, "201 No Content\r\n"};
@@ -60,7 +60,7 @@ int main() {
         string strId = req.url_params.get("id");
         if (strId.empty()) return crow::response(400);
         try {
-            uint32_t id = str2ul(strId);
+            uint32_t id = str2uint(strId);
             if (priorityQueue.exists(id)) {
                 string outputStr = priorityQueue.get(id).toString();
                 return crow::response{outputStr};
@@ -95,7 +95,7 @@ int main() {
         string strUid = req.url_params.get("uid");
         if (strUid.empty()) return crow::response(400);
         try {
-            uint32_t uid = str2ul(strUid);
+            uint32_t uid = str2uint(strUid);
             if (priorityQueue.userExists(uid)) {
                 set<uint32_t> outputSet = priorityQueue.getUserNodes(uid);
                 std::ostringstream os;
