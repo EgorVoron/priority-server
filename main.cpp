@@ -78,7 +78,6 @@ int main() {
 
     CROW_ROUTE(app, "/getMax").methods("GET"_method)([] {
         try {
-            priorityQueue.print();
             if (priorityQueue.isEmpty()) return crow::response(404);
             return crow::response(priorityQueue.getMax().toString());
         } catch (exception &e) {
