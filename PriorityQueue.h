@@ -81,12 +81,23 @@ PriorityQueue::PriorityQueue(string path) : filePath(std::move(path)) {
             std::string contents((std::istreambuf_iterator<char>(infile)),
                                  std::istreambuf_iterator<char>());
             json listJson = json::from_bson(contents)["data"];
+            // tested
+//            for (const auto& nodeJson : listJson) {
+//                Node node = nodeFromJson(nodeJson);
+//
+//                array.push_back(node);
+//                id2idx[node.id] = (array.size() - 1);
+//                siftUp(array.size() - 1);
+//
+//                userNodesIds[node.uid].insert(node.id);
+//                nodeUser[node.id] = node.uid;
+//            }
             for (const auto& nodeJson : listJson) {
                 Node node = nodeFromJson(nodeJson);
 
                 array.push_back(node);
                 id2idx[node.id] = (array.size() - 1);
-                siftUp(array.size() - 1);
+//                siftUp(array.size() - 1);
 
                 userNodesIds[node.uid].insert(node.id);
                 nodeUser[node.id] = node.uid;
