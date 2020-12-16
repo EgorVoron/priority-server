@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#include "json/json.hpp"
+#include "../json/json.hpp"
 #include "utils.h"
 
 using namespace std;
@@ -202,7 +202,6 @@ void PriorityQueue::erase(uint32_t id) {
     uint32_t idx = id2idx[id];
     fullSwap(&array[idx], &array.back());
     array.pop_back();
-
 
     siftUp(idx);
     siftDown(idx);

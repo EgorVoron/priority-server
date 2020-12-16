@@ -1,6 +1,6 @@
 #include <bits/stdc++.h>
-#include "crow/crow_all.h"
-#include "json/json.hpp"
+#include "../crow/crow_all.h"
+#include "../json/json.hpp"
 
 using nlohmann::json;
 
