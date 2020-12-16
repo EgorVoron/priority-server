@@ -38,6 +38,11 @@ Node nodeFromJson(json j) {
     return node;
 }
 
+long long lastIdx(vector<Node> &array) {
+    assert(array.empty());
+    return (long long)array.size() - 1;
+}
+
 long long parent(long long i) { return i / 2; }
 long long leftChild(long long i) { return i * 2; }
 long long rightChild(long long i) { return i * 2 + 1; }
@@ -76,7 +81,7 @@ PriorityQueue::PriorityQueue(string path) : filePath(std::move(path)) {
     if (correctFile(filePath)) {
         try {
             ifstream infile(filePath);
-            uint8_t tmp;
+//            uint8_t tmp;
             vector<uint8_t> vectorBson;
             std::string contents((std::istreambuf_iterator<char>(infile)),
                                  std::istreambuf_iterator<char>());
@@ -96,7 +101,7 @@ PriorityQueue::PriorityQueue(string path) : filePath(std::move(path)) {
                 Node node = nodeFromJson(nodeJson);
 
                 array.push_back(node);
-                id2idx[node.id] = (array.size() - 1);
+                id2idx[node.id] = lastIdx(array);
 //                siftUp(array.size() - 1);
 
                 userNodesIds[node.uid].insert(node.id);
@@ -184,8 +189,8 @@ bool PriorityQueue::isEmpty() {
 long long PriorityQueue::insert(long long uid, long long priority, json payload, long long randll) {
     Node node = Node(randll, uid, priority, payload);
     array.push_back(node);
-    id2idx[node.id] = (array.size() - 1);
-    siftUp(array.size() - 1);
+    id2idx[node.id] = lastIdx(array);
+    siftUp(lastIdx(array));
 
     userNodesIds[uid].insert(node.id);
     nodeUser[node.id] = uid;
@@ -195,7 +200,7 @@ long long PriorityQueue::insert(long long uid, long long priority, json payload,
 void PriorityQueue::extractMax() {
     long long id = array[0].id;
 
-    fullSwap(&array[0], &array[array.size() - 1]);
+    fullSwap(&array[0], &array.back());
     array.pop_back();
     siftDown(0);
 
@@ -207,7 +212,7 @@ void PriorityQueue::extractMax() {
 
 void PriorityQueue::erase(long long id) {
     long long idx = id2idx[id];
-    fullSwap(&array[idx], &array[array.size() - 1]);
+    fullSwap(&array[idx], &array.back());
     array.pop_back();
 
 
