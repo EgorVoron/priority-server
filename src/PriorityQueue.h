@@ -12,7 +12,11 @@ struct Node {
     json payload;
 
     Node(uint32_t id, uint32_t uid, uint32_t priority, json &payload) : id(id), uid(uid), priority(priority),
-                                                                           payload(payload) {}
+                                                                           payload(payload) {};
+
+    ~Node() {
+        payload.clear();
+    }
 
     json toJson() {
         json j;
